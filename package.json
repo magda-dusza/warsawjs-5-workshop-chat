@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "db:clear": "rm -f ./db/chat_users.db",
+    "db:bootstrap": "knex migrate:latest --env production",
+    "db:rebuild": "npm run db:clear && npm run db:bootstrap",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Magdalena Dusza",
