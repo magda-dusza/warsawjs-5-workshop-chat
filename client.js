@@ -5,15 +5,26 @@ const readline = require('readline').createInterface({
     output: process.stdout
 });
 
+function clearPrompt() {
+    process.stdout.cursorTo(0);
+    process.stdout.clearLine();
+}
+
 console.log('client started');
 
 client.on('message', (msg)=>{
-    console.log(`from server: ${msg}`);
+    clearPrompt();
+    console.log(`>> ${msg}`);
+    readline.prompt();
 });
 
-// display '>' sign, allow user to type in console
+// display '>' sign
 readline.prompt();
 
 readline.on('line', (line)=>{
-    client.emit('message', line);
+    if(line.trim()){
+        client.emit('message', line);
+    }
+    //new line with '>'
+    readline.prompt();
 });
