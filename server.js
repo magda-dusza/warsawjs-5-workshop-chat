@@ -6,7 +6,8 @@ server.on('connection', (client) => {
     console.log(`client with id: ${client.id}, connected`);
     client.on('message', (msg)=>{
         console.log(msg);
-        client.emit('message', msg);
+        //broadcast send to all clients, despite client who send message
+        client.broadcast.emit('message', msg);
     });
 });
 
