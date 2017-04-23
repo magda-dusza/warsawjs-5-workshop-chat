@@ -3,15 +3,16 @@ const server = io();
 
 const USERS = {};
 
-server.on('connection', (client) => {
-    let clientName = '';
-    console.log(`client with id: ${client.id}, connected`);
-    client.on('message', (msg)=>{
-        console.log(msg);
+function handleMessage(client) {
+    return (msgObject)=>{
+        console.log(msgObject.username, msgObject.msg);
         //broadcast send to all clients, despite client who send message
-        client.broadcast.emit('message', msg);
-    });
-    client.on('register', (user) => {
+        client.broadcast.emit('message', {username: msgObject.username, msg: msgObject.msg});
+    }
+}
+
+function handleRegister(client) {
+    return (user) =>{
         console.log('register', user);
         if(USERS[user.username]){
             client.emit('register', false);
@@ -22,8 +23,11 @@ server.on('connection', (client) => {
             };
             client.emit('register', true);
         }
-    });
-    client.on('login', (userObject) => {
+    }
+}
+
+function handleLogin(client) {
+    return (userObject) =>{
         console.log('login', userObject);
         const user = USERS[userObject.username];
         if(!user){
@@ -37,10 +41,19 @@ server.on('connection', (client) => {
         } else {
             client.emit('login', false);
         }
-    })
-    client.on('logout', (username) => {
-        USERS[username].logged_in = false;
-    });
+    }
+}
+
+function handleLogout(username) {
+    USERS[username].logged_in = false;
+}
+
+server.on('connection', (client) => {
+    console.log(`client with id: ${client.id}, connected`);
+    client.on('message', handleMessage(client));
+    client.on('register', handleRegister(client));
+    client.on('login', handleLogin(client));
+    client.on('logout', handleLogout);
 });
 
 server.listen(3000);

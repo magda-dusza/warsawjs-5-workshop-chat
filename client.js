@@ -4,24 +4,50 @@ const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
 });
+let LOGGED_USER = '';
+
+console.log('client started');
 
 function clearPrompt() {
     process.stdout.cursorTo(0);
     process.stdout.clearLine();
 }
 
-console.log('client started');
-
-client.on('message', (msg)=>{
+function handleMessage(msgObject) {
     clearPrompt();
-    console.log(`>> ${msg}`);
+    console.log(`${msgObject.username || 'unknown'}: ${msgObject.msg}`);
     readline.prompt();
-});
+}
+
+function handleLogin(username) {
+    console.log(username);
+    if(username){
+        readline.setPrompt(`${username}: `)
+        LOGGED_USER = username;
+    } else {
+        console.log('>> LOGIN FAILED!!!');
+    }
+    readline.prompt();
+}
+
+function handleRegister(registerStatus) {
+    clearPrompt();
+    if(registerStatus){
+        console.log('>> register success');
+    } else {
+        console.log('>> register failed');
+    }
+    readline.prompt();
+}
 
 // display '>' sign
 readline.prompt();
 
-let LOGGED_USER = '';
+client.on('message', handleMessage);
+
+client.on('login', handleLogin);
+
+client.on('register', handleRegister);
 
 readline.on('line', (line)=>{
     let lineArgs = line.split(/\s+/);
@@ -44,29 +70,8 @@ readline.on('line', (line)=>{
         client.emit('logout', LOGGED_USER);
     }
      else if(line.trim()){
-        client.emit('message', line);
+        client.emit('message', {username: LOGGED_USER, msg : line});
     }
     //new line with '>'
-    readline.prompt();
-});
-
-client.on('login', (username) =>{
-    console.log(username);
-    if(username){
-        readline.setPrompt(`${username} :`)
-        LOGGED_USER = username;
-    } else {
-        console.log('>> LOGIN FAILED!!!');
-    }
-    readline.prompt();
-})
-
-client.on('register', (registerStatus) => {
-    clearPrompt();
-    if(registerStatus){
-        console.log('>> register success');
-    } else {
-        console.log('>> register failed');
-    }
     readline.prompt();
 });
